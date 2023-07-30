@@ -1,8 +1,6 @@
 import { InMemoryQuestionsRepository } from 'test/repositories/in-memory-questions-repository';
-import { GetQuestionBySlugUseCase } from './get-question-by-slug';
 import { makeQuestion } from 'test/factories/make-question';
-import { Slug } from '../../enterprise/entities/value-objects/slug';
-import { FetchRecentQuestionsUseCase } from './fetch-recent-topics';
+import { FetchRecentQuestionsUseCase } from './fetch-recent-questions';
 
 let inMemoryQuestionsRepository: InMemoryQuestionsRepository;
 let sut: FetchRecentQuestionsUseCase;
@@ -15,26 +13,26 @@ describe('Fetch Recent Questions', () => {
 
   it('should be able to fetch recent question', async () => {
     await inMemoryQuestionsRepository.create(
-      makeQuestion({ createdAt: new Date('2022, 0, 20') })
+      makeQuestion({ createdAt: new Date(2022, 0, 21) })
     );
     await inMemoryQuestionsRepository.create(
-      makeQuestion({ createdAt: new Date('2022, 0, 18') })
+      makeQuestion({ createdAt: new Date(2022, 0, 19) })
     );
     await inMemoryQuestionsRepository.create(
-      makeQuestion({ createdAt: new Date('2022, 0, 23') })
+      makeQuestion({ createdAt: new Date(2022, 0, 24) })
     );
 
-    const { questions } = await sut.execute({ page: 1 });
+    const result = await sut.execute({ page: 1 });
 
-    expect(questions).toEqual([
+    expect(result.value?.questions).toEqual([
       expect.objectContaining({
-        createdAt: new Date('2022, 0, 23'),
+        createdAt: new Date(2022, 0, 24),
       }),
       expect.objectContaining({
-        createdAt: new Date('2022, 0, 20'),
+        createdAt: new Date(2022, 0, 21),
       }),
       expect.objectContaining({
-        createdAt: new Date('2022, 0, 18'),
+        createdAt: new Date(2022, 0, 19),
       }),
     ]);
   });
@@ -44,8 +42,8 @@ describe('Fetch Recent Questions', () => {
       await inMemoryQuestionsRepository.create(makeQuestion());
     }
 
-    const { questions } = await sut.execute({ page: 2 });
+    const result = await sut.execute({ page: 2 });
 
-    expect(questions).toHaveLength(2);
+    expect(result.value?.questions).toHaveLength(2);
   });
 });

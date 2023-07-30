@@ -1,15 +1,19 @@
 import { AnswerRepository } from '../repositories/answers-repository';
 import { Question } from '../../enterprise/entities/question';
 import { QuestionsRepository } from '../repositories/questions-repository';
+import { Either, left, right } from '@/core/either';
+import { ResoucerNotFounError } from './errors/resource-not-found-error';
+import { NotAllowedError } from './errors/not-allowed-error';
 
 interface ChooseQuestionBestAnswerUseCaseRequest {
   answerId: string;
   authorId: string;
 }
 
-interface ChooseQuestionBestAnswerUseCaseResponse {
-  question: Question;
-}
+type ChooseQuestionBestAnswerUseCaseResponse = Either<
+  ResoucerNotFounError | NotAllowedError,
+  { question: Question }
+>;
 
 export class ChooseQuestionBestAnswerUseCase {
   constructor(
@@ -24,7 +28,7 @@ export class ChooseQuestionBestAnswerUseCase {
     const answer = await this.answerRepository.findById(answerId);
 
     if (!answer) {
-      throw new Error('Answer not found');
+      return left(new ResoucerNotFounError());
     }
 
     const question = await this.questionRepository.findById(
@@ -32,17 +36,17 @@ export class ChooseQuestionBestAnswerUseCase {
     );
 
     if (!question) {
-      throw new Error('Question not found');
+      return left(new ResoucerNotFounError());
     }
 
     if (authorId !== question.authorId.toString()) {
-      throw new Error('Only the question author can choose the best answer');
+      return left(new NotAllowedError());
     }
 
     question.bestAnswerId = answer.id;
 
     await this.questionRepository.save(question);
 
-    return { question };
+    return right({ question });
   }
 }
