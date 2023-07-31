@@ -2,14 +2,21 @@ import { InMemoryQuestionsRepository } from 'test/repositories/in-memory-questio
 import { makeQuestion } from 'test/factories/make-question';
 import { DeleteQuestionUseCase } from './delete-question';
 import { UniqueEntityId } from '@/core/entities/unique-entity-id';
-import { NotAllowedError } from './errors/not-allowed-error';
+import { InMemoryQuestionAttachmentRepository } from 'test/repositories/in-memory-question-attachments-repository';
+import { makeQuestionAttachment } from 'test/factories/make-question-attachment';
+import { ResoucerNotFounError } from './errors/resource-not-found-error';
 
 let inMemoryQuestionsRepository: InMemoryQuestionsRepository;
+let inMemoryQuestionAttachmentsRepository: InMemoryQuestionAttachmentRepository;
 let sut: DeleteQuestionUseCase;
 
 describe('Delete Question', () => {
   beforeEach(() => {
-    inMemoryQuestionsRepository = new InMemoryQuestionsRepository();
+    inMemoryQuestionAttachmentsRepository =
+      new InMemoryQuestionAttachmentRepository();
+    inMemoryQuestionsRepository = new InMemoryQuestionsRepository(
+      inMemoryQuestionAttachmentsRepository
+    );
     sut = new DeleteQuestionUseCase(inMemoryQuestionsRepository);
   });
 
@@ -23,12 +30,24 @@ describe('Delete Question', () => {
 
     await inMemoryQuestionsRepository.create(newQuestion);
 
+    inMemoryQuestionAttachmentsRepository.items.push(
+      makeQuestionAttachment({
+        questionId: newQuestion.id,
+        attachmentId: new UniqueEntityId('1'),
+      }),
+      makeQuestionAttachment({
+        questionId: newQuestion.id,
+        attachmentId: new UniqueEntityId('2'),
+      })
+    );
+
     await sut.execute({
       questionId: 'question1',
       authorId: 'author-1',
     });
 
     expect(inMemoryQuestionsRepository.items).toHaveLength(0);
+    expect(inMemoryQuestionAttachmentsRepository.items).toHaveLength(0);
   });
 
   it('should not be able to delete a question from another user', async () => {
@@ -36,7 +55,7 @@ describe('Delete Question', () => {
       {
         authorId: new UniqueEntityId('author-1'),
       },
-      new UniqueEntityId('question1')
+      new UniqueEntityId('question-1')
     );
 
     await inMemoryQuestionsRepository.create(newQuestion);
@@ -47,6 +66,6 @@ describe('Delete Question', () => {
     });
 
     expect(result.isLeft()).toBe(true);
-    expect(result.value).toBeInstanceOf(NotAllowedError);
+    expect(result.value).toBeInstanceOf(ResoucerNotFounError);
   });
 });
