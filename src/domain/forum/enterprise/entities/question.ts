@@ -6,6 +6,7 @@ import dayjs from 'dayjs';
 import { QuestionAttachment } from './question-attachment';
 import { th } from '@faker-js/faker';
 import { QuestionAttachmentList } from './question-attachment-list';
+import { QuestionBestAnswerChosenEvent } from './events/question-best-answer-choosen';
 
 export interface QuestionProps {
   authorId: UniqueEntityId;
@@ -83,6 +84,12 @@ export class Question extends AggregateRoot<QuestionProps> {
   }
 
   set bestAnswerId(bestAnswerId: UniqueEntityId | undefined) {
+    if (bestAnswerId && bestAnswerId !== this.props.bestAnswerId) {
+      this.addDomainEvent(
+        new QuestionBestAnswerChosenEvent(this, bestAnswerId)
+      );
+    }
+
     this.props.bestAnswerId = bestAnswerId;
 
     this.touch();
