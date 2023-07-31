@@ -3,7 +3,7 @@ import { makeAnswerComment } from 'test/factories/make-answer-comment';
 import { UniqueEntityId } from '@/core/entities/unique-entity-id';
 import { InMemoryAnswerRepository } from 'test/repositories/in-memory-answers-repository';
 import { InMemoryAnswerCommentsRepository } from 'test/repositories/in-memory-answer-comments-repository';
-import { NotAllowedError } from './errors/not-allowed-error';
+import { NotAllowedError } from '../../../../core/errors/errors/not-allowed-error';
 
 let inMemoryAnswersRepository: InMemoryAnswerRepository;
 let inMemoryAnswerCommentsRepository: InMemoryAnswerCommentsRepository;

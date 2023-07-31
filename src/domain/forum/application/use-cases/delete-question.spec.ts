@@ -4,7 +4,7 @@ import { DeleteQuestionUseCase } from './delete-question';
 import { UniqueEntityId } from '@/core/entities/unique-entity-id';
 import { InMemoryQuestionAttachmentRepository } from 'test/repositories/in-memory-question-attachments-repository';
 import { makeQuestionAttachment } from 'test/factories/make-question-attachment';
-import { ResoucerNotFounError } from './errors/resource-not-found-error';
+import { ResoucerNotFounError } from '../../../../core/errors/errors/resource-not-found-error';
 
 let inMemoryQuestionsRepository: InMemoryQuestionsRepository;
 let inMemoryQuestionAttachmentsRepository: InMemoryQuestionAttachmentRepository;
